@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Reaction Simulator</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .classroom {
+            width: 600px;
+            height: 400px;
+            background-color: #c8e6c9;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .blackboard {
+            width: 300px;
+            height: 150px;
+            background-color: #2e7d32;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid #4e342e;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .desk {
+            width: 120px;
+            height: 80px;
+            background-color: #8d6e63;
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 0;
+        }
+        .desk::before {
+            content: '';
+            width: 20px;
+            height: 80px;
+            background-color: #6d4c41;
+            position: absolute;
+            bottom: -80px;
+            left: 20px;
+        }
+        .desk::after {
+            content: '';
+            width: 20px;
+            height: 80px;
+            background-color: #6d4c41;
+            position: absolute;
+            bottom: -80px;
+            right: 20px;
+        }
+        .kid {
+            width: 100px;
+            height: 120px;
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .kid-body {
+            width: 60px;
+            height: 80px;
+            background-color: #90caf9;
+            border-radius: 10px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        .kid-head {
+            width: 70px;
+            height: 70px;
+            background-color: #ffccbc;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            overflow: hidden;
+            z-index: 2;
+        }
+        .kid-hair {
+            width: 80px;
+            height: 40px;
+            background-color: #5d4037;
+            border-radius: 40px 40px 0 0;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .kid-eyes {
+            width: 40px;
+            height: 10px;
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-between;
+        }
+        .kid-eye {
+            width: 10px;
+            height: 10px;
+            background-color: #3e2723;
+            border-radius: 50%;
+            position: relative;
+        }
+        .kid-mouth {
+            width: 30px;
+            height: 10px;
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .books {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+        .book {
+            width: 60px;
+            height: 10px;
+            margin-bottom: 2px;
+            border-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .controls {
+            width: 600px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider {
+            width: 80%;
+            height: 20px;
+        }
+        .reaction {
+            font-size: 24px;
+            margin-top: 10px;
+            text-align: center;
+            min-height: 60px;
+            color: #333;
+        }
+        .homework-label {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin-top: 5px;
+        }
+        .slider-labels span {
+            font-size: 14px;
+        }
+        .sweat {
+            position: absolute;
+            width: 5px;
+            height: 10px;
+            background-color: #90caf9;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sweat-left {
+            top: 25px;
+            left: 10px;
+        }
+        .sweat-right {
+            top: 25px;
+            right: 10px;
+        }
+        .tear {
+            position: absolute;
+            width: 5px;
+            height: 15px;
+            background-color: #90caf9;
+            border-radius: 5px;
+            top: 40px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .tear-left {
+            left: 15px;
+        }
+        .tear-right {
+            right: 15px;
+        }
+        .speech-bubble {
+            position: absolute;
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 200px;
+            top: 50px;
+            right: 100px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: -10px;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid white;
+        }
+        .emoji {
+            font-size: 24px;
+            margin-left: 10px;
+        }
+        .homework-count {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Homework Reaction Simulator</h1>
+    
+    <div class="classroom">
+        <div class="blackboard"></div>
+        <div class="desk"></div>
+        <div class="kid">
+            <div class="kid-body"></div>
+            <div class="kid-head">
+                <div class="kid-hair"></div>
+                <div class="kid-eyes">
+                    <div class="kid-eye left-eye"></div>
+                    <div class="kid-eye right-eye"></div>
+                </div>
+                <div class="kid-mouth"></div>
+                <div class="sweat sweat-left"></div>
+                <div class="sweat sweat-right"></div>
+                <div class="tear tear-left"></div>
+                <div class="tear tear-right"></div>
+            </div>
+            <div class="books">
+                <div class="book" style="background-color: #f44336;"></div>
+            </div>
+        </div>
+        <div class="speech-bubble" id="speech-bubble"></div>
+    </div>
+    
+    <div class="controls">
+        <div class="slider-container">
+            <div class="homework-label">Amount of Homework: <span class="homework-count" id="homework-count">1</span></div>
+            <input type="range" min="1" max="6" value="1" class="slider" id="homework-slider">
+            <div class="slider-labels">
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+                <span>6</span>
+            </div>
+        </div>
+        <div class="reaction" id="reaction">
+            "Huh? What's this homework about?" <span class="emoji">🤔</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const slider = document.getElementById('homework-slider');
+            const reaction = document.getElementById('reaction');
+            const homeworkCount = document.getElementById('homework-count');
+            const kidMouth = document.querySelector('.kid-mouth');
+            const speechBubble = document.getElementById('speech-bubble');
+            const books = document.querySelector('.books');
+            const leftEye = document.querySelector('.left-eye');
+            const rightEye = document.querySelector('.right-eye');
+            const sweatLeft = document.querySelector('.sweat-left');
+            const sweatRight = document.querySelector('.sweat-right');
+            const tearLeft = document.querySelector('.tear-left');
+            const tearRight = document.querySelector('.tear-right');
+            
+            // Book colors
+            const bookColors = [
+                '#f44336', // Red
+                '#9c27b0', // Purple
+                '#2196f3', // Blue
+                '#4caf50', // Green
+                '#ff9800', // Orange
+                '#795548'  // Brown
+            ];
+            
+            // Update kid's reaction based on value
+            function updateKidReaction(value) {
+                // Update homework count display
+                homeworkCount.textContent = value;
+                
+                // Update books
+                books.innerHTML = '';
+                for (let i = 0; i < value; i++) {
+                    const book = document.createElement('div');
+                    book.className = 'book';
+                    book.style.backgroundColor = bookColors[i];
+                    // Slightly offset each book to create a better stacked appearance
+                    book.style.marginTop = (i * 2) + 'px';
+                    books.appendChild(book);
+                }
+                
+                // Update kid's reaction based on value
+                switch (parseInt(value)) {
+                    case 1:
+                        // Confused
+                        kidMouth.style.width = '20px';
+                        kidMouth.style.height = '5px';
+                        kidMouth.style.backgroundColor = '#3e2723';
+                        kidMouth.style.borderRadius = '5px';
+                        kidMouth.style.borderTop = 'none';
+                        leftEye.style.height = '10px';
+                        rightEye.style.height = '10px';
+                        leftEye.style.borderRadius = '50%';
+                        rightEye.style.borderRadius = '50%';
+                        sweatLeft.style.opacity = '0';
+                        sweatRight.style.opacity = '0';
+                        tearLeft.style.opacity = '0';
+                        tearRight.style.opacity = '0';
+                        reaction.innerHTML = '"Huh? What\'s this homework about?" <span class="emoji">🤔</span>';
+                        speechBubble.textContent = "I don't get it...";
+                        speechBubble.style.opacity = '1';
+                        break;
+                    case 2:
+                        // Curious
+                        kidMouth.style.width = '20px';
+                        kidMouth.style.height = '10px';
+                        kidMouth.style.borderTop = '2px solid #3e2723';
+                        kidMouth.style.borderBottom = 'none';
+                        kidMouth.style.backgroundColor = 'transparent';
+                        kidMouth.style.borderRadius = '0';
+                        leftEye.style.height = '10px';
+                        rightEye.style.height = '10px';
+                        leftEye.style.borderRadius = '50%';
+                        rightEye.style.borderRadius = '50%';
+                        sweatLeft.style.opacity = '0';
+                        sweatRight.style.opacity = '0';
+                        tearLeft.style.opacity = '0';
+                        tearRight.style.opacity = '0';
+                        reaction.innerHTML = '"This looks interesting!" <span class="emoji">🧐</span>';
+                        speechBubble.textContent = "I wonder what we'll learn!";
+                        speechBubble.style.opacity = '1';
+                        break;
+                    case 3:
+                        // Understanding (sweet spot)
+                        kidMouth.style.width = '30px';
+                        kidMouth.style.height = '15px';
+                        kidMouth.style.borderRadius = '0 0 15px 15px';
+                        kidMouth.style.borderTop = 'none';
+                        kidMouth.style.backgroundColor = '#3e2723';
+                        leftEye.style.height = '10px';
+                        rightEye.style.height = '10px';
+                        leftEye.style.borderRadius = '50%';
+                        rightEye.style.borderRadius = '50%';
+                        sweatLeft.style.opacity = '0';
+                        sweatRight.style.opacity = '0';
+                        tearLeft.style.opacity = '0';
+                        tearRight.style.opacity = '0';
+                        reaction.innerHTML = '"Perfect! I can handle this." <span class="emoji">😊</span>';
+                        speechBubble.textContent = "This is the right amount!";
+                        speechBubble.style.opacity = '1';
+                        break;
+                    case 4:
+                        // Getting stressed
+                        kidMouth.style.width = '25px';
+                        kidMouth.style.height = '5px';
+                        kidMouth.style.backgroundColor = '#3e2723';
+                        kidMouth.style.borderRadius = '5px';
+                        kidMouth.style.borderTop = 'none';
+                        leftEye.style.height = '10px';
+                        rightEye.style.height = '10px';
+                        leftEye.style.borderRadius = '50%';
+                        rightEye.style.borderRadius = '50%';
+                        sweatLeft.style.opacity = '1';
+                        sweatRight.style.opacity = '1';
+                        tearLeft.style.opacity = '0';
+                        tearRight.style.opacity = '0';
+                        reaction.innerHTML = '"That\'s quite a lot of homework..." <span class="emoji">😓</span>';
+                        speechBubble.textContent = "Will I have time to play?";
+                        speechBubble.style.opacity = '1';
+                        break;
+                    case 5:
+                        // Angry
+                        kidMouth.style.width = '30px';
+                        kidMouth.style.height = '15px';
+                        kidMouth.style.borderRadius = '15px 15px 0 0';
+                        kidMouth.style.backgroundColor = '#3e2723';
+                        kidMouth.style.borderTop = 'none';
+                        leftEye.style.height = '5px';
+                        rightEye.style.height = '5px';
+                        leftEye.style.borderRadius = '5px';
+                        rightEye.style.borderRadius = '5px';
+                        sweatLeft.style.opacity = '1';
+                        sweatRight.style.opacity = '1';
+                        tearLeft.style.opacity = '0';
+                        tearRight.style.opacity = '0';
+                        reaction.innerHTML = '"No way! This is too much!" <span class="emoji">😠</span>';
+                        speechBubble.textContent = "This isn't fair!";
+                        speechBubble.style.opacity = '1';
+                        break;
+                    case 6:
+                        // Crying
+                        kidMouth.style.width = '30px';
+                        kidMouth.style.height = '20px';
+                        kidMouth.style.borderRadius = '15px 15px 0 0';
+                        kidMouth.style.backgroundColor = '#d50000';
+                        kidMouth.style.borderTop = 'none';
+                        leftEye.style.height = '2px';
+                        rightEye.style.height = '2px';
+                        leftEye.style.borderRadius = '5px';
+                        rightEye.style.borderRadius = '5px';
+                        sweatLeft.style.opacity = '0';
+                        sweatRight.style.opacity = '0';
+                        tearLeft.style.opacity = '1';
+                        tearRight.style.opacity = '1';
+                        reaction.innerHTML = '"I\'ll never finish this!" <span class="emoji">😭</span>';
+                        speechBubble.textContent = "WAAAH! I want to go home!";
+                        speechBubble.style.opacity = '1';
+                        break;
+                }
+            }
+            
+            // Initial update
+            updateKidReaction(slider.value);
+            
+            // Update when slider changes
+            slider.oninput = function() {
+                updateKidReaction(this.value);
+            };
+            
+            // Add animation to the kid
+            setInterval(function() {
+                const value = parseInt(slider.value);
+                
+                if (value >= 4) {
+                    // Make the kid shake slightly when stressed, angry or crying
+                    const kid = document.querySelector('.kid');
+                    kid.style.transform = `translateX(calc(-50% + ${Math.random() * 4 - 2}px))`;
+                    
+                    if (value === 6) {
+                        // Make tears fall when crying
+                        const tearLeftTop = parseInt(tearLeft.style.top || '40');
+                        const tearRightTop = parseInt(tearRight.style.top || '40');
+                        
+                        tearLeft.style.top = (tearLeftTop + 1) + 'px';
+                        tearRight.style.top = (tearRightTop + 1) + 'px';
+                        
+                        if (tearLeftTop > 60) {
+                            tearLeft.style.top = '40px';
+                        }
+                        
+                        if (tearRightTop > 60) {
+                            tearRight.style.top = '40px';
+                        }
+                    }
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
