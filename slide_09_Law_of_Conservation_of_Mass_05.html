@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Law of Conservation of Mass</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f4f4f4; /* Consistent background color */
+        }
+        #animation-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f4f4; /* Consistent background color */
+        }
+        #animation-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background-color: #f4f4f4; /* Consistent background color */
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .equation-text {
+            font-size: 24px;
+            font-weight: bold;
+            fill: #333333;
+            text-anchor: middle;
+        }
+        .label-text {
+            font-size: 20px;
+            fill: #333333;
+            text-anchor: middle;
+        }
+        .atom {
+            /* No specific transition here, cx/cy animated by JS */
+        }
+        .bond {
+            stroke-linecap: round;
+            /* Opacity animated by JS */
+        }
+    </style>
+</head>
+<body>
+    <div id="animation-container">
+        <svg id="animation-svg" viewBox="0 0 1080 720" preserveAspectRatio="xMidYMid meet">
+            <!--
+                Definitions for reusable SVG elements like markers.
+                Purpose: Define an arrowhead marker for use on lines.
+                Academic Concept: Used for the reaction arrow, visually separating reactants from products.
+                Implementation: An SVG <marker> element defining a triangular arrowhead.
+            -->
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#333333"/>
+                </marker>
+            </defs>
+
+            <!--
+                Balance Scale Scene Group:
+                Purpose: Visually represent the Law of Conservation of Mass using the Fe + S -> FeS reaction.
+                Academic Concept: Demonstrates that the total mass of reactants equals the total mass of products.
+                Physical Considerations: The scale is depicted as perfectly balanced, signifying equal masses.
+                Implementation: A collection of static SVG elements (rects, lines, paths, circles, text) that form the visual of the balance scale and its contents.
+            -->
+            <g id="balance-scale-scene">
+                <text class="equation-text" x="270" y="70">Fe + S → FeS</text>
+
+                <!-- Scale Base and Post elements -->
+                <rect x="195" y="520" width="150" height="25" fill="#607D8B"/>
+                <rect x="265" y="270" width="10" height="250" fill="#607D8B"/>
+                <circle cx="270" cy="270" r="10" fill="#546E7A"/>
+
+                <!-- Scale Beam element -->
+                <line x1="70" y1="270" x2="470" y2="270" stroke="#455A64" stroke-width="10"/>
+
+                <!-- Left Pan with Reactants (Fe + S) -->
+                <line x1="120" y1="270" x2="120" y2="320" stroke="#455A64" stroke-width="3"/>
+                <path d="M70,320 Q120,380 170,320 Z" fill="#90A4AE" stroke="#455A64" stroke-width="2"/>
+                <!-- Fe Powder (Dark Grey circles representing iron particles) -->
+                <g id="fe-powder">
+                    <circle cx="105" cy="310" r="7" fill="#505050"/>
+                    <circle cx="115" cy="315" r="7" fill="#505050"/>
+                    <circle cx="95" cy="315" r="6" fill="#505050"/>
+                    <circle cx="105" cy="320" r="7" fill="#505050"/>
+                </g>
+                <!-- S Powder (Yellow circles representing sulfur particles) -->
+                <g id="s-powder">
+                    <circle cx="135" cy="310" r="7" fill="#FFD700"/>
+                    <circle cx="145" cy="315" r="7" fill="#FFD700"/>
+                    <circle cx="125" cy="315" r="6" fill="#FFD700"/>
+                    <circle cx="135" cy="320" r="7" fill="#FFD700"/>
+                </g>
+
+                <!-- Right Pan with Product (FeS) -->
+                <line x1="420" y1="270" x2="420" y2="320" stroke="#455A64" stroke-width="3"/>
+                <path d="M370,320 Q420,380 470,320 Z" fill="#90A4AE" stroke="#455A64" stroke-width="2"/>
+                <!-- FeS Compound (Brownish circles representing iron sulfide) -->
+                <g id="fes-compound">
+                    <circle cx="410" cy="310" r="8" fill="#A0522D"/>
+                    <circle cx="425" cy="310" r="8" fill="#A0522D"/>
+                    <circle cx="418" cy="305" r="8" fill="#A0522D"/>
+                    <circle cx="415" cy="318" r="7" fill="#A0522D"/>
+                    <circle cx="428" cy="318" r="7" fill="#A0522D"/>
+                </g>
+
+                <text class="label-text" x="270" y="600">Mass of Reactants = Mass of Products</text>
+            </g>
+
+            <!-- Vertical Separator Line -->
+            <line x1="540" y1="30" x2="540" y2="690" stroke="#B0BEC5" stroke-width="2" stroke-dasharray="5,5"/>
+
+            <!--
+                Particle Diagram Scene Group (CH4 + 2O2 -> CO2 + 2H2O):
+                Purpose: Visually demonstrate atom conservation and rearrangement during a chemical reaction.
+                Academic Concept: Atoms are neither created nor destroyed, only rearranged. The count of each type of atom remains constant.
+                Physical Considerations: Atom counts (1C, 4H, 4O) must be identical before and after. Colors identify atom types consistently. Movement shows rearrangement from reactant structures to product structures.
+                Implementation: Contains SVG groups for atoms and bonds, which are populated and animated by JavaScript.
+            -->
+            <g id="particle-diagram-scene">
+                <text class="equation-text" x="810" y="70">CH₄ + 2O₂ → CO₂ + 2H₂O</text>
+
+                <!-- Reaction Arrow (Static visual separator) -->
+                <line id="reaction-arrow-line" x1="810" y1="300" x2="810" y2="360" stroke="#333333" stroke-width="3" marker-end="url(#arrowhead)"/>
+
+                <!-- Atoms Group: atom SVG elements will be appended here by JavaScript -->
+                <g id="atoms-group"></g>
+                <!-- Bonds Group: bond SVG elements will be appended here by JavaScript -->
+                <g id="bonds-group"></g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        // DOM Element references for SVG manipulation
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const atomsGroup = document.getElementById('atoms-group');
+        const bondsGroup = document.getElementById('bonds-group');
+
+        // Atom properties: radii, colors, and stroke for different atom types.
+        // These visual properties ensure atoms are distinguishable and consistently represented.
+        const atomVisuals = {
+            C: { r: 14, fill: '#202020', stroke: 'none', strokeWidth: 0 },
+            H: { r: 9, fill: '#FFFFFF', stroke: '#333333', strokeWidth: 2 },
+            O: { r: 12, fill: '#FF4136', stroke: 'none', strokeWidth: 0 }
+        };
+
+        // Atom data: Defines each atom's ID, type, start (reactant) position (sx, sy), and end (product) position (ex, ey).
+        // This data is fundamental for the animation, ensuring each atom moves from a specific reactant location
+        // to a specific product location, visually demonstrating atom conservation and rearrangement.
+        const atomsData = [
+            // CH4 Reactant Atoms
+            { id: 'C1', type: 'C', sx: 710, sy: 180 },
+            { id: 'H1', type: 'H', sx: 710, sy: 180 - 32 }, // N of C1
+            { id: 'H2', type: 'H', sx: 710 + 32, sy: 180 }, // E of C1
+            { id: 'H3', type: 'H', sx: 710, sy: 180 + 32 }, // S of C1
+            { id: 'H4', type: 'H', sx: 710 - 32, sy: 180 }, // W of C1
+            // 2O2 Reactant Atoms
+            { id: 'O1', type: 'O', sx: 860 - 22, sy: 150 }, // O2 molecule 1
+            { id: 'O2', type: 'O', sx: 860 + 22, sy: 150 }, // O2 molecule 1
+            { id: 'O3', type: 'O', sx: 860 - 22, sy: 210 }, // O2 molecule 2
+            { id: 'O4', type: 'O', sx: 860 + 22, sy: 210 }  // O2 molecule 2
+        ];
+
+        // Define end positions (ex, ey) for atoms in product molecules
+        // CO2 (O1-C1-O2 linear) centered at (810, 450)
+        atomsData.find(a => a.id === 'C1').ex = 810; atomsData.find(a => a.id === 'C1').ey = 450;
+        atomsData.find(a => a.id === 'O1').ex = 810 - 35; atomsData.find(a => a.id === 'O1').ey = 450;
+        atomsData.find(a => a.id === 'O2').ex = 810 + 35; atomsData.find(a => a.id === 'O2').ey = 450;
+
+        // H2O (1) (H1-O3-H2 bent) O3 centered at (750, 550)
+        const o3ex = 750, o3ey = 550;
+        atomsData.find(a => a.id === 'O3').ex = o3ex; atomsData.find(a => a.id === 'O3').ey = o3ey;
+        atomsData.find(a => a.id === 'H1').ex = o3ex - atomVisuals.O.r * 1.5 * Math.cos(Math.PI / 3.5); // Approx 104.5 deg / 2
+        atomsData.find(a => a.id === 'H1').ey = o3ey + atomVisuals.O.r * 1.5 * Math.sin(Math.PI / 3.5);
+        atomsData.find(a => a.id === 'H2').ex = o3ex + atomVisuals.O.r * 1.5 * Math.cos(Math.PI / 3.5);
+        atomsData.find(a => a.id === 'H2').ey = o3ey + atomVisuals.O.r * 1.5 * Math.sin(Math.PI / 3.5);
+
+        // H2O (2) (H3-O4-H4 bent) O4 centered at (870, 550)
+        const o4ex = 870, o4ey = 550;
+        atomsData.find(a => a.id === 'O4').ex = o4ex; atomsData.find(a => a.id === 'O4').ey = o4ey;
+        atomsData.find(a => a.id === 'H3').ex = o4ex - atomVisuals.O.r * 1.5 * Math.cos(Math.PI / 3.5);
+        atomsData.find(a => a.id === 'H3').ey = o4ey + atomVisuals.O.r * 1.5 * Math.sin(Math.PI / 3.5);
+        atomsData.find(a => a.id === 'H4').ex = o4ex + atomVisuals.O.r * 1.5 * Math.cos(Math.PI / 3.5);
+        atomsData.find(a => a.id === 'H4').ey = o4ey + atomVisuals.O.r * 1.5 * Math.sin(Math.PI / 3.5);
+
+
+        // Bond definitions: Links atom IDs for reactant and product molecules.
+        // 'type' determines initial visibility and fading behavior. This data structure is key for
+        // visualizing bond breaking (reactant bonds fade out) and bond formation (product bonds fade in).
+        const bondsData = [
+            // Reactant bonds
+            { from: 'C1', to: 'H1', type: 'reactant' }, { from: 'C1', to: 'H2', type: 'reactant' },
+            { from: 'C1', to: 'H3', type: 'reactant' }, { from: 'C1', to: 'H4', type: 'reactant' },
+            { from: 'O1', to: 'O2', type: 'reactant' }, { from: 'O3', to: 'O4', type: 'reactant' },
+            // Product bonds
+            { from: 'C1', to: 'O1', type: 'product' }, { from: 'C1', to: 'O2', type: 'product' }, // CO2
+            { from: 'O3', to: 'H1', type: 'product' }, { from: 'O3', to: 'H2', type: 'product' }, // H2O (1)
+            { from: 'O4', to: 'H3', type: 'product' }, { from: 'O4', to: 'H4', type: 'product' }  // H2O (2)
+        ];
+
+        // Create SVG elements for atoms
+        // This loop iterates through atomData, creating an SVG <circle> for each atom.
+        // Initial positions are set to reactant locations (sx, sy). These elements are what JS will animate.
+        atomsData.forEach(data => {
+            const visual = atomVisuals[data.type];
+            const circle = document.createElementNS(svgNS, 'circle');
+            circle.setAttribute('id', data.id);
+            circle.setAttribute('cx', data.sx);
+            circle.setAttribute('cy', data.sy);
+            circle.setAttribute('r', visual.r);
+            circle.setAttribute('fill', visual.fill);
+            if (visual.stroke !== 'none') {
+                circle.setAttribute('stroke', visual.stroke);
+                circle.setAttribute('stroke-width', visual.strokeWidth);
+            }
+            circle.classList.add('atom');
+            atomsGroup.appendChild(circle);
+            data.el = circle; // Store SVG element reference in atom data object
+        });
+
+        // Create SVG elements for bonds
+        // This loop iterates through bondsData, creating an SVG <line> for each bond.
+        // Initial coordinates match reactant atom positions. Opacity is set based on type (reactant visible, product hidden).
+        bondsData.forEach((data, index) => {
+            const line = document.createElementNS(svgNS, 'line');
+            const atomFrom = atomsData.find(a => a.id === data.from);
+            const atomTo = atomsData.find(a => a.id === data.to);
+            
+            line.setAttribute('id', `bond-${index}`);
+            line.setAttribute('x1', atomFrom.sx);
+            line.setAttribute('y1', atomFrom.sy);
+            line.setAttribute('x2', atomTo.sx);
+            line.setAttribute('y2', atomTo.sy);
+            line.setAttribute('stroke', '#777777');
+            line.setAttribute('stroke-width', '5'); // Slightly thicker bonds
+            line.classList.add('bond');
+            
+            line.style.opacity = (data.type === 'reactant') ? 1 : 0;
+            bondsGroup.appendChild(line);
+            data.el = line; // Store SVG element reference
+        });
+
+        // Animation timing parameters
+        // These constants define the duration of each phase of the animation, ensuring a clear and well-paced visual sequence.
+        const animationConfig = {
+            initialDelay: 500,
+            reactantBondsFadeOutDuration: 500,
+            atomMoveDuration: 2000,
+            productBondsFadeInDuration: 500,
+            finalHold: 1000 
+        };
+        let startTime = null;
+
+        // Easing function (easeInOutQuad) for smooth animation transitions.
+        // This function is applied to the normalized time (0 to 1) of the atom movement phase,
+        // creating a more natural acceleration and deceleration effect.
+        function easeInOutQuad(t) {
+            return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        }
+
+        /*
+            Main animation loop function: `animateParticleDiagram`
+            Purpose: Orchestrates the entire animation sequence for the particle diagram.
+            Academic Concept: Visually executes the rearrangement of atoms from reactants to products, demonstrating conservation.
+            Physical Considerations: Updates atom positions (cx, cy) and bond opacities over time according to the defined phases.
+                                     The movement of atoms from start to end positions is the core representation of rearrangement.
+            Implementation: Uses `requestAnimationFrame` for smooth rendering. Calculates elapsed time to determine current animation phase and progress within that phase.
+        */
+        function animateParticleDiagram(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+
+            // Phase 1: Initial Delay (Reactants are shown as initially set up)
+
+            // Phase 2: Reactant bonds fade out
+            const reactFadeStart = animationConfig.initialDelay;
+            const reactFadeEnd = reactFadeStart + animationConfig.reactantBondsFadeOutDuration;
+            if (elapsed >= reactFadeStart && elapsed < reactFadeEnd) {
+                const progress = (elapsed - reactFadeStart) / animationConfig.reactantBondsFadeOutDuration;
+                bondsData.filter(b => b.type === 'reactant').forEach(bond => {
+                    bond.el.style.opacity = 1 - progress;
+                });
+            } else if (elapsed >= reactFadeEnd) {
+                 bondsData.filter(b => b.type === 'reactant').forEach(bond => {
+                    bond.el.style.opacity = 0; // Ensure fully faded
+                });
+            }
+
+            // Phase 3: Atoms move from reactant positions to product positions
+            const moveStart = reactFadeEnd;
+            const moveEnd = moveStart + animationConfig.atomMoveDuration;
+            if (elapsed >= moveStart && elapsed < moveEnd) {
+                const progress = (elapsed - moveStart) / animationConfig.atomMoveDuration;
+                const easedProgress = easeInOutQuad(progress);
+
+                atomsData.forEach(atom => {
+                    const currentX = atom.sx + (atom.ex - atom.sx) * easedProgress;
+                    const currentY = atom.sy + (atom.ey - atom.sy) * easedProgress;
+                    atom.el.setAttribute('cx', currentX);
+                    atom.el.setAttribute('cy', currentY);
+                });
+                
+                // Bonds (that are still somewhat visible or will become visible) update their positions to follow atoms.
+                // This ensures bonds appear connected to atoms during and after movement.
+                bondsData.forEach(bond => {
+                    const atomFromData = atomsData.find(a => a.id === bond.from);
+                    const atomToData = atomsData.find(a => a.id === bond.to);
+                    bond.el.setAttribute('x1', atomFromData.el.getAttribute('cx'));
+                    bond.el.setAttribute('y1', atomFromData.el.getAttribute('cy'));
+                    bond.el.setAttribute('x2', atomToData.el.getAttribute('cx'));
+                    bond.el.setAttribute('y2', atomToData.el.getAttribute('cy'));
+                });
+
+            } else if (elapsed >= moveEnd) {
+                // Ensure atoms are precisely at their final product positions.
+                atomsData.forEach(atom => {
+                    atom.el.setAttribute('cx', atom.ex);
+                    atom.el.setAttribute('cy', atom.ey);
+                });
+                 // Ensure product bonds are precisely at their final positions.
+                bondsData.forEach(bond => {
+                    const atomFromData = atomsData.find(a => a.id === bond.from);
+                    const atomToData = atomsData.find(a => a.id === bond.to);
+                    bond.el.setAttribute('x1', atomFromData.ex);
+                    bond.el.setAttribute('y1', atomFromData.ey);
+                    bond.el.setAttribute('x2', atomToData.ex);
+                    bond.el.setAttribute('y2', atomToData.ey);
+                });
+            }
+            
+            // Phase 4: Product bonds fade in
+            const productFadeStart = moveEnd;
+            const productFadeEnd = productFadeStart + animationConfig.productBondsFadeInDuration;
+            if (elapsed >= productFadeStart && elapsed < productFadeEnd) {
+                const progress = (elapsed - productFadeStart) / animationConfig.productBondsFadeInDuration;
+                bondsData.filter(b => b.type === 'product').forEach(bond => {
+                    bond.el.style.opacity = progress;
+                });
+            } else if (elapsed >= productFadeEnd) {
+                bondsData.filter(b => b.type === 'product').forEach(bond => {
+                    bond.el.style.opacity = 1; // Ensure fully visible
+                });
+            }
+
+            // Continue animation if total duration not yet reached
+            const totalDuration = productFadeEnd + animationConfig.finalHold;
+            if (elapsed < totalDuration) {
+                requestAnimationFrame(animateParticleDiagram);
+            }
+            // else: animation finished. Could add a restart mechanism here if looping was desired.
+        }
+
+        // Initiate the animation sequence for the particle diagram.
+        requestAnimationFrame(animateParticleDiagram);
+
+    </script>
+</body>
+</html>
